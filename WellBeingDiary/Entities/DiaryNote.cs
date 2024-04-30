@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace WellBeingDiary.Entities
 {
@@ -6,32 +6,10 @@ namespace WellBeingDiary.Entities
     {
         public int Id { get; set; }
         public DateTime CreationDate { get; set; } = DateTime.UtcNow;
-        public string Title { get; set; }    
-        public string? Text { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Text { get; set; } = string.Empty;
         public bool IsPublic { get; set; } = false;
-
-        private int _rating;
-
-        public int Rating
-        {
-            get { return _rating; }
-            set
-            {
-                if (value < 1 || value > 10)
-                {
-                    throw new ArgumentOutOfRangeException("Rating must be between 1 and 10.");
-                }
-                _rating = value;
-            }
-        }
-
-        [ForeignKey("User")]
-        public int UserId { get; set; }
-
-        public DiaryNote()
-        {
-            Title = $"Note from {CreationDate:yyyy-MM-dd HH:mm:ss}";
-        }
-
+        [Range(1, 10)]
+        public int Rating { get; set; }
     }
 }
