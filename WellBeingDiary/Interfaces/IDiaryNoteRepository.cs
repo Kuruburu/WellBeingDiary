@@ -1,0 +1,16 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using WellBeingDiary.Dtos.DiaryNote;
+using WellBeingDiary.Entities;
+
+namespace WellBeingDiary.Interfaces
+{
+    public interface IDiaryNoteRepository
+    {
+        Task<List<DiaryNote>> GetAllAsync();
+        Task<DiaryNote?> GetByIdAsync(int id);
+        Task<DiaryNote> CreateAsync(DiaryNote diaryModel);
+        Task<DiaryNote?> UpdateAsync(int id, UpdateDiaryNoteRequestDto diaryDto);
+        Task<DiaryNote?> DeleteAsync(int id);
+
+    }
+}

@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using WellBeingDiary.Data;
+using WellBeingDiary.Interfaces;
+using WellBeingDiary.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +13,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<DiaryDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IDiaryNoteRepository, DiaryNoteRepository>();
 
 var app = builder.Build();
 

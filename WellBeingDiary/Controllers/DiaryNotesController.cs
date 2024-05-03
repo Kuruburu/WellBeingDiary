@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using WellBeingDiary.Data;
 using WellBeingDiary.Dtos.DiaryNote;
 using WellBeingDiary.Entities;
+using WellBeingDiary.Interfaces;
 using WellBeingDiary.Mappers;
 
 namespace WellBeingDiary.Controllers
@@ -16,17 +17,17 @@ namespace WellBeingDiary.Controllers
     [ApiController]
     public class DiaryNotesController : ControllerBase
     {
-        private readonly DiaryDbContext _context;
+        private readonly IDiaryNoteRepository _diaryRepo;
 
-        public DiaryNotesController(DiaryDbContext context)
+        public DiaryNotesController(IDiaryNoteRepository diaryRepo)
         {
-            _context = context;
+            _diaryRepo = diaryRepo;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var diaryNotes = await _context.DiaryNotes.ToListAsync();
+            var diaryNotes = await _diaryRepo.GetAllAsync();
 
             var diaryNoteDto = diaryNotes.Select(d => d.ToDiaryNoteDto());
 
@@ -36,7 +37,7 @@ namespace WellBeingDiary.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var diaryNote = await _context.DiaryNotes.FindAsync(id);
+            var diaryNote = await _diaryRepo.GetByIdAsync(id);
 
             if(diaryNote == null)
             {
@@ -49,28 +50,22 @@ namespace WellBeingDiary.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateDiaryNoteRequestDto diaryNoteDto)
         {
-            var diaryNoteModel =  diaryNoteDto.ToDiaryNoteFromCreateDto();
-            await _context.DiaryNotes.AddAsync(diaryNoteModel);
-            await _context.SaveChangesAsync();
+            var diaryNoteModel = diaryNoteDto.ToDiaryNoteFromCreateDto();
+
+            await _diaryRepo.CreateAsync(diaryNoteModel);
+
             return CreatedAtAction(nameof(GetById), new { id = diaryNoteModel.Id }, diaryNoteModel.ToDiaryNoteDto());
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateDiaryNoteRequestDto updateDto)
         {
-            var diaryNoteModel = await _context.DiaryNotes.FirstOrDefaultAsync(x => x.Id == id);
+            var diaryNoteModel = await _diaryRepo.UpdateAsync(id, updateDto);
 
             if(diaryNoteModel == null)
             {
                 return NotFound();
             }
-
-            diaryNoteModel.Title = updateDto.Title;
-            diaryNoteModel.Text = updateDto.Text;
-            diaryNoteModel.Rating = updateDto.Rating;
-            diaryNoteModel.IsPublic = updateDto.IsPublic;
-
-            await _context.SaveChangesAsync();
 
             return Ok(diaryNoteModel.ToDiaryNoteDto());
         }
@@ -78,19 +73,14 @@ namespace WellBeingDiary.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var diaryNoteModel = await _context.DiaryNotes.FirstOrDefaultAsync(x => x.Id ==id);
+            var diaryNoteModel = await _diaryRepo.DeleteAsync(id);
             
             if(diaryNoteModel == null)
             {
                 return NotFound();
             }
-
-            _context.DiaryNotes.Remove(diaryNoteModel);
-            await _context.SaveChangesAsync();
             
             return NoContent();
-        }
-
-    
+        }    
     }
 }
