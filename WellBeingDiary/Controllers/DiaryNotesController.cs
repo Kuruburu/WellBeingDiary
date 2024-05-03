@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WellBeingDiary.Data;
+using WellBeingDiary.Dtos.DiaryNote;
 using WellBeingDiary.Entities;
+using WellBeingDiary.Mappers;
 
 namespace WellBeingDiary.Controllers
 {
@@ -21,88 +23,71 @@ namespace WellBeingDiary.Controllers
             _context = context;
         }
 
-        // GET: api/DiaryNotes
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DiaryNote>>> GetDiaryNotes()
+        public IActionResult GetAll()
         {
-            return await _context.DiaryNotes.ToListAsync();
+            var diaryNotes = _context.DiaryNotes.ToList()
+             .Select(d => d.ToDiaryNoteDto());
+            return Ok(diaryNotes);
         }
 
-        // GET: api/DiaryNotes/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<DiaryNote>> GetDiaryNote(int id)
+        public IActionResult GetById([FromRoute] int id)
         {
-            var diaryNote = await _context.DiaryNotes.FindAsync(id);
+            var diaryNote = _context.DiaryNotes.Find(id);
 
-            if (diaryNote == null)
+            if(diaryNote == null)
             {
                 return NotFound();
             }
-
-            return diaryNote;
+            return Ok(diaryNote.ToDiaryNoteDto());
         }
 
-        // PUT: api/DiaryNotes/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutDiaryNote(int id, DiaryNote diaryNote)
-        {
-            if (id != diaryNote.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(diaryNote).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DiaryNoteExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/DiaryNotes
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<DiaryNote>> PostDiaryNote(DiaryNote diaryNote)
+        public IActionResult Create([FromBody] CreateDiaryNoteRequestDto diaryNoteDto)
         {
-            _context.DiaryNotes.Add(diaryNote);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetDiaryNote", new { id = diaryNote.Id }, diaryNote);
+            var diaryNoteModel = diaryNoteDto.ToDiaryNoteFromCreateDto();
+            _context.DiaryNotes.Add(diaryNoteModel);
+            _context.SaveChanges();
+            return CreatedAtAction(nameof(GetById), new { id = diaryNoteModel.Id }, diaryNoteModel.ToDiaryNoteDto());
         }
 
-        // DELETE: api/DiaryNotes/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDiaryNote(int id)
+        [HttpPut("{id}")]
+        public IActionResult Update([FromRoute] int id, [FromBody] UpdateDiaryNoteRequestDto updateDto)
         {
-            var diaryNote = await _context.DiaryNotes.FindAsync(id);
-            if (diaryNote == null)
+            var diaryNoteModel = _context.DiaryNotes.FirstOrDefault(x => x.Id == id);
+
+            if(diaryNoteModel == null)
             {
                 return NotFound();
             }
 
-            _context.DiaryNotes.Remove(diaryNote);
-            await _context.SaveChangesAsync();
+            diaryNoteModel.Title = updateDto.Title;
+            diaryNoteModel.Text = updateDto.Text;
+            diaryNoteModel.Rating = updateDto.Rating;
+            diaryNoteModel.IsPublic = updateDto.IsPublic;
 
+            _context.SaveChanges();
+
+            return Ok(diaryNoteModel.ToDiaryNoteDto());
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete([FromRoute] int id)
+        {
+            var diaryNoteModel = _context.DiaryNotes.FirstOrDefault(x => x.Id ==id);
+            
+            if(diaryNoteModel == null)
+            {
+                return NotFound();
+            }
+
+            _context.DiaryNotes.Remove(diaryNoteModel);
+            _context.SaveChanges();
+            
             return NoContent();
         }
 
-        private bool DiaryNoteExists(int id)
-        {
-            return _context.DiaryNotes.Any(e => e.Id == id);
-        }
+    
     }
 }
