@@ -24,38 +24,41 @@ namespace WellBeingDiary.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var diaryNotes = _context.DiaryNotes.ToList()
-             .Select(d => d.ToDiaryNoteDto());
-            return Ok(diaryNotes);
+            var diaryNotes = await _context.DiaryNotes.ToListAsync();
+
+            var diaryNoteDto = diaryNotes.Select(d => d.ToDiaryNoteDto());
+
+            return Ok(diaryNoteDto);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById([FromRoute] int id)
+        public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var diaryNote = _context.DiaryNotes.Find(id);
+            var diaryNote = await _context.DiaryNotes.FindAsync(id);
 
             if(diaryNote == null)
             {
                 return NotFound();
             }
+
             return Ok(diaryNote.ToDiaryNoteDto());
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] CreateDiaryNoteRequestDto diaryNoteDto)
+        public async Task<IActionResult> Create([FromBody] CreateDiaryNoteRequestDto diaryNoteDto)
         {
-            var diaryNoteModel = diaryNoteDto.ToDiaryNoteFromCreateDto();
-            _context.DiaryNotes.Add(diaryNoteModel);
-            _context.SaveChanges();
+            var diaryNoteModel =  diaryNoteDto.ToDiaryNoteFromCreateDto();
+            await _context.DiaryNotes.AddAsync(diaryNoteModel);
+            await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetById), new { id = diaryNoteModel.Id }, diaryNoteModel.ToDiaryNoteDto());
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update([FromRoute] int id, [FromBody] UpdateDiaryNoteRequestDto updateDto)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateDiaryNoteRequestDto updateDto)
         {
-            var diaryNoteModel = _context.DiaryNotes.FirstOrDefault(x => x.Id == id);
+            var diaryNoteModel = await _context.DiaryNotes.FirstOrDefaultAsync(x => x.Id == id);
 
             if(diaryNoteModel == null)
             {
@@ -67,15 +70,15 @@ namespace WellBeingDiary.Controllers
             diaryNoteModel.Rating = updateDto.Rating;
             diaryNoteModel.IsPublic = updateDto.IsPublic;
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Ok(diaryNoteModel.ToDiaryNoteDto());
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete([FromRoute] int id)
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var diaryNoteModel = _context.DiaryNotes.FirstOrDefault(x => x.Id ==id);
+            var diaryNoteModel = await _context.DiaryNotes.FirstOrDefaultAsync(x => x.Id ==id);
             
             if(diaryNoteModel == null)
             {
@@ -83,7 +86,7 @@ namespace WellBeingDiary.Controllers
             }
 
             _context.DiaryNotes.Remove(diaryNoteModel);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             
             return NoContent();
         }
