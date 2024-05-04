@@ -27,6 +27,9 @@ namespace WellBeingDiary.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
+            if (!ModelState.IsValid) 
+                return BadRequest(ModelState);
+
             var diaryNotes = await _diaryRepo.GetAllAsync();
 
             var diaryNoteDto = diaryNotes.Select(d => d.ToDiaryNoteDto());
@@ -34,9 +37,12 @@ namespace WellBeingDiary.Controllers
             return Ok(diaryNoteDto);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var diaryNote = await _diaryRepo.GetByIdAsync(id);
 
             if(diaryNote == null)
@@ -50,6 +56,9 @@ namespace WellBeingDiary.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateDiaryNoteRequestDto diaryNoteDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var diaryNoteModel = diaryNoteDto.ToDiaryNoteFromCreateDto();
 
             await _diaryRepo.CreateAsync(diaryNoteModel);
@@ -57,9 +66,12 @@ namespace WellBeingDiary.Controllers
             return CreatedAtAction(nameof(GetById), new { id = diaryNoteModel.Id }, diaryNoteModel.ToDiaryNoteDto());
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateDiaryNoteRequestDto updateDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var diaryNoteModel = await _diaryRepo.UpdateAsync(id, updateDto);
 
             if(diaryNoteModel == null)
@@ -70,7 +82,7 @@ namespace WellBeingDiary.Controllers
             return Ok(diaryNoteModel.ToDiaryNoteDto());
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             var diaryNoteModel = await _diaryRepo.DeleteAsync(id);
@@ -81,6 +93,6 @@ namespace WellBeingDiary.Controllers
             }
             
             return NoContent();
-        }    
+        }
     }
 }
