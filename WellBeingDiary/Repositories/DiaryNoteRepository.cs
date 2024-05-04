@@ -26,7 +26,7 @@ namespace WellBeingDiary.Repositories
         {
             var diaryNoteModel = await _context.DiaryNotes.FirstOrDefaultAsync(x => x.Id == id);
 
-            if (diaryNoteModel == null) 
+            if (diaryNoteModel == null)
             {
                 return null;
             }
