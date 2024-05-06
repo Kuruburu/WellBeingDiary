@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using WellBeingDiary.Data;
 using WellBeingDiary.Entities;
 using WellBeingDiary.Interfaces;
@@ -16,7 +17,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<DiaryDbContext>(options => 
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
@@ -45,14 +48,13 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidAudience = builder.Configuration["JWT: Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
-        System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT: SigningKey"])
-        )
+        Encoding.UTF8.GetBytes("diarynote"))
     };
 });
 
+// builder.Configuration["JWT: SigningKey"]
+
 builder.Services.AddScoped<IDiaryNoteRepository, DiaryNoteRepository>();
-
-
 
 var app = builder.Build();
 

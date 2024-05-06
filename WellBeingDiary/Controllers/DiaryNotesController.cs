@@ -27,9 +27,6 @@ namespace WellBeingDiary.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            if (!ModelState.IsValid) 
-                return BadRequest(ModelState);
-
             var diaryNotes = await _diaryRepo.GetAllAsync();
 
             var diaryNoteDto = diaryNotes.Select(d => d.ToDiaryNoteDto());
@@ -40,9 +37,6 @@ namespace WellBeingDiary.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var diaryNote = await _diaryRepo.GetByIdAsync(id);
 
             if(diaryNote == null)
