@@ -5,8 +5,6 @@ namespace WellBeingDiary.Dtos.DiaryNote
 {
     public class CreateDiaryNoteRequestDto
     {
-        [Required]
-        [MinLength(1, ErrorMessage = "Title can not be empty.")]
         [MaxLength(50, ErrorMessage = "Title can not be longer than 50 characters.")]
         public string Title { get; set; } = string.Empty;
 

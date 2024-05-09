@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
+using System.Reflection;
 using WellBeingDiary.Dtos.DiaryNote;
 using WellBeingDiary.Entities;
 
@@ -23,7 +24,7 @@ namespace WellBeingDiary.Mappers
         {
             return new DiaryNote 
             { 
-                Title = diaryNoteDto.Title,
+                Title = string.IsNullOrWhiteSpace(diaryNoteDto.Title) ? $"Note from {DateTime.UtcNow.ToString("dd-MM-yyyy")}" : diaryNoteDto.Title,
                 Text = diaryNoteDto.Text,
                 IsPublic = diaryNoteDto.IsPublic,
                 Rating = diaryNoteDto.Rating,
