@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.CodeDom;
+using Microsoft.EntityFrameworkCore;
 using WellBeingDiary.Dtos.Account;
 using WellBeingDiary.Entities;
+using WellBeingDiary.Interfaces;
 
 namespace WellBeingDiary.Controllers
 {
@@ -12,9 +12,37 @@ namespace WellBeingDiary.Controllers
     public class AccountController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;
-        public AccountController(UserManager<AppUser> userManager)
+        private readonly ITokenService _tokenService;
+        private readonly SignInManager<AppUser> _signinManager;
+        public AccountController(UserManager<AppUser> userManager, ITokenService tokenService, SignInManager<AppUser> signInManager)
         {
-             _userManager = userManager;
+            _userManager = userManager;
+            _tokenService = tokenService;
+            _signinManager = signInManager;
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(LoginDto loginDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.UserName == loginDto.Username!.ToLower());
+
+            if (user == null) return Unauthorized("Invalid username!");
+
+            var result = await _signinManager.CheckPasswordSignInAsync(user, loginDto.Password!, false);
+
+            if (!result.Succeeded) return Unauthorized("Username not found and/or password incorrect");
+
+            return Ok(
+                new NewUserDto
+                {
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    Token = await _tokenService.CreateToken(user)
+                }
+            );
         }
 
         [HttpPost("register")]
@@ -22,32 +50,38 @@ namespace WellBeingDiary.Controllers
         {
             try
             {
-                if(!ModelState.IsValid)
+                if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
                 var appUser = new AppUser
                 {
                     UserName = registerDto.Username,
-                    Email = registerDto.EmailAddress,
+                    Email = registerDto.Email,
                 };
 
-                var createdUser = await _userManager.CreateAsync(appUser, registerDto.Password);
+                var createdUser = await _userManager.CreateAsync(appUser, registerDto.Password!);
 
-                if (!createdUser.Succeeded) 
+                if (!createdUser.Succeeded)
                     return StatusCode(500, createdUser.Errors);
-                
+
                 var roleResult = await _userManager.AddToRoleAsync(appUser, "User");
 
-                if(!roleResult.Succeeded)
+                if (!roleResult.Succeeded)
                     return StatusCode(500, roleResult.Errors);
 
-                return Created();
+                return Ok(
+                    new NewUserDto
+                    {
+                        UserName = appUser.UserName,
+                        Email = appUser.Email,
+                        Token = await _tokenService.CreateToken(appUser)
+                    }
+                );
             }
             catch (Exception e)
             {
                 return StatusCode(500, e);
             }
         }
-
     }
 }

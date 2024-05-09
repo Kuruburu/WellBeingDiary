@@ -4,6 +4,6 @@ namespace WellBeingDiary.Entities
 {
     public class AppUser : IdentityUser
     {
-        
+
     }
 }
