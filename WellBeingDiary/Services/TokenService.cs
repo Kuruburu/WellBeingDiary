@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -11,8 +12,8 @@ namespace WellBeingDiary.Services
     public class TokenService : ITokenService
     {
         private readonly IConfiguration _config;
-        private readonly SymmetricSecurityKey _key;
         private readonly UserManager<AppUser> _userManager;
+        private readonly SymmetricSecurityKey _key;
 
         public TokenService(IConfiguration config, UserManager<AppUser> userManager)
         {
@@ -20,7 +21,7 @@ namespace WellBeingDiary.Services
             _userManager = userManager;
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSettings:Key"]!));
         }
-        public async Task<string?> GetUserRoleAsync(string userName)
+        public async Task<IEnumerable<string>> GetUserRoleAsync(string userName)
         {
             var user = await _userManager.FindByNameAsync(userName);
 
@@ -28,27 +29,24 @@ namespace WellBeingDiary.Services
             {
                 var roles = await _userManager.GetRolesAsync(user);
 
-                if (roles.Count > 0)
-                {
-                    return roles[0];
-                }
+                return roles;
             }
-
-            return null;
+            return null!;
         }
         public async Task<string> CreateToken(AppUser user)
         {
-
-            //var encodedRole = Encoding.UTF8.GetBytes(role);
-            var userRole = await GetUserRoleAsync(user.UserName!);
+            var userRoles = await GetUserRoleAsync(user.UserName!);
 
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Email, user.Email!),
                 new Claim(JwtRegisteredClaimNames.GivenName, user.UserName!),
-                new Claim(ClaimTypes.Role, userRole!)
             };
 
+            foreach (var userRole in userRoles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, userRole!));
+            }
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
 
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -58,7 +56,6 @@ namespace WellBeingDiary.Services
                 SigningCredentials = creds,
                 Issuer = _config["JwtSettings:Issuer"],
                 Audience = _config["JwtSettings:Audience"],
-                
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
