@@ -32,19 +32,31 @@ namespace WellBeingDiary.Services
             }
             return null!;
         }
+        public async Task<IEnumerable<string>> GetUserIdAsync(string userName)
+        {
+            var user = await _userManager.FindByNameAsync(userName);
+
+            if (user != null)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+
+                return roles;
+            }
+            return null!;
+        }
+
         public async Task<string> CreateToken(AppUser user)
         {
             var userRoles = await GetUserRoleAsync(user.UserName!);
 
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-                new Claim(JwtRegisteredClaimNames.GivenName, user.UserName!),
+                new Claim(ClaimTypes.NameIdentifier, user.Id)
             };
 
             foreach (var userRole in userRoles)
             {
-                claims.Add(new Claim(ClaimTypes.Role, userRole!));
+                claims.Add(new Claim(ClaimTypes.Role, userRole));
             }
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
 
