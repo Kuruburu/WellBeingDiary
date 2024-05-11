@@ -51,13 +51,13 @@ namespace WellBeingDiary.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "3ea8e2f7-ecb6-494c-babf-f37489ea0071",
+                            Id = "735184c3-9fa5-45ed-b15c-f67d40029c4e",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "c0d40412-685f-4655-a1c1-906eccf5c861",
+                            Id = "b7824855-0a62-40e6-9118-89f77afb3a2b",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -259,7 +259,12 @@ namespace WellBeingDiary.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("DiaryNotes");
                 });
@@ -313,6 +318,15 @@ namespace WellBeingDiary.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("WellBeingDiary.Entities.DiaryNote", b =>
+                {
+                    b.HasOne("WellBeingDiary.Entities.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

@@ -10,5 +10,6 @@ namespace WellBeingDiary.Entities
         public string Text { get; set; } = string.Empty;
         public bool IsPublic { get; set; } = false;
         public int Rating { get; set; }
+        public AppUser? User { get; set; }
     }
 }
