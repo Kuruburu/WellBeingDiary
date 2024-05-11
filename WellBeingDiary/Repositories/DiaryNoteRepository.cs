@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using WellBeingDiary.Data;
 using WellBeingDiary.Dtos.DiaryNote;
 using WellBeingDiary.Entities;

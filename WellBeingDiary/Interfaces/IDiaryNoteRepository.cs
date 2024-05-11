@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using WellBeingDiary.Dtos.DiaryNote;
+﻿using WellBeingDiary.Dtos.DiaryNote;
 using WellBeingDiary.Entities;
 
 namespace WellBeingDiary.Interfaces

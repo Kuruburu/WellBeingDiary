@@ -1,7 +1,4 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
-using System.Reflection;
-using WellBeingDiary.Dtos.DiaryNote;
+﻿using WellBeingDiary.Dtos.DiaryNote;
 using WellBeingDiary.Entities;
 
 namespace WellBeingDiary.Mappers
