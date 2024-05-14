@@ -83,6 +83,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddScoped<IDiaryNoteRepository, DiaryNoteRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 var app = builder.Build();

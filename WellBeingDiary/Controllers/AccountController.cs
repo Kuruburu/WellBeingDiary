@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WellBeingDiary.Dtos.Account;
@@ -12,13 +13,37 @@ namespace WellBeingDiary.Controllers
     public class AccountController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;
-        private readonly ITokenService _tokenService;
         private readonly SignInManager<AppUser> _signinManager;
-        public AccountController(UserManager<AppUser> userManager, ITokenService tokenService, SignInManager<AppUser> signInManager)
+        private readonly IUserRepository _userRepo;
+        private readonly ITokenService _tokenService;
+
+        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IUserRepository userRepo, ITokenService tokenService)
         {
             _userManager = userManager;
-            _tokenService = tokenService;
             _signinManager = signInManager;
+            _userRepo = userRepo;
+            _tokenService = tokenService;
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult>GetAll() 
+        {
+            var users = await _userRepo.GetAllAsync();
+            
+            return Ok(users);
+        }
+
+        [HttpGet("{id:guid}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetById([FromRoute] string id)
+        {
+            var user = await _userRepo.GetByIdAsync(id);
+
+            if (user == null)
+                return NotFound();
+
+            return Ok(user);
         }
 
         [HttpPost("login")]
@@ -82,6 +107,18 @@ namespace WellBeingDiary.Controllers
             {
                 return StatusCode(500, e);
             }
+        }
+
+        [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete([FromRoute] string id)
+        {
+            var user = await _userRepo.DeleteAsync(id);
+
+            if (user == null)
+                return NotFound();
+
+            return NoContent();
         }
     }
 }
