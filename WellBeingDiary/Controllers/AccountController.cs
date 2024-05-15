@@ -46,6 +46,30 @@ namespace WellBeingDiary.Controllers
             return Ok(user);
         }
 
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<IActionResult> GetMe()
+        {
+            var user = await _userRepo.GetMeAsync();
+
+            if (user is null)
+                return NotFound();
+
+            return Ok(user);
+        }
+
+        [HttpGet("me/id")]
+        [Authorize]
+        public IActionResult GetMyId()
+        {
+            var userId = _userRepo.GetMyId();
+
+            if (userId == null)
+                return NotFound();
+
+            return Ok(userId);
+        }
+
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
