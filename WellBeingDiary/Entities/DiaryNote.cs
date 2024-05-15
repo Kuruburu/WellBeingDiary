@@ -1,6 +1,4 @@
-﻿
-
-namespace WellBeingDiary.Entities
+﻿namespace WellBeingDiary.Entities
 {
     public class DiaryNote
     {
@@ -10,6 +8,7 @@ namespace WellBeingDiary.Entities
         public string Text { get; set; } = string.Empty;
         public bool IsPublic { get; set; } = false;
         public int Rating { get; set; }
+        public string? UserId { get; set; }
         public AppUser? User { get; set; }
     }
 }
