@@ -4,7 +4,7 @@ using WellBeingDiary.Entities;
 namespace WellBeingDiary.Mappers
 {
     public static class DiaryNoteMappers
-    { 
+    {
         public static DiaryNoteDto ToDiaryNoteDto(this DiaryNote diaryNote)
         {
             return new DiaryNoteDto
@@ -13,11 +13,12 @@ namespace WellBeingDiary.Mappers
                 Title = diaryNote.Title,
                 Text = diaryNote.Text,
                 IsPublic = diaryNote.IsPublic,
-                Rating = diaryNote.Rating       
+                Rating = diaryNote.Rating,
+                UserId = diaryNote.UserId
             };
         }
 
-        public static DiaryNote ToDiaryNoteFromCreateDto(this CreateDiaryNoteRequestDto diaryNoteDto)
+        public static DiaryNote ToDiaryNoteFromCreateDto(this CreateDiaryNoteRequestDto diaryNoteDto, string userId)
         {
             return new DiaryNote 
             { 
@@ -25,7 +26,8 @@ namespace WellBeingDiary.Mappers
                 Text = diaryNoteDto.Text,
                 IsPublic = diaryNoteDto.IsPublic,
                 Rating = diaryNoteDto.Rating,
-                CreationDate = DateTime.UtcNow
+                CreationDate = DateTime.UtcNow,
+                UserId = userId
             };
         }
     }

@@ -11,10 +11,12 @@ namespace WellBeingDiary.Controllers
     public class DiaryNotesController : ControllerBase
     {
         private readonly IDiaryNoteRepository _diaryRepo;
+        private readonly IUserRepository _userRepo;
 
-        public DiaryNotesController(IDiaryNoteRepository diaryRepo)
+        public DiaryNotesController(IDiaryNoteRepository diaryRepo, IUserRepository userRepo)
         {
             _diaryRepo = diaryRepo;
+            _userRepo = userRepo;
         }
 
         [HttpGet]
@@ -26,6 +28,25 @@ namespace WellBeingDiary.Controllers
             var diaryNoteDto = diaryNotes.Select(d => d.ToDiaryNoteDto());
 
             return Ok(diaryNoteDto);
+        }
+
+        [HttpGet("my")]
+        [Authorize]
+        public async Task<IActionResult> GetAllMy()
+        {
+            var userId = _userRepo.GetMyId();
+
+            if (userId == null)
+                return NotFound();
+
+            var diaryNotes = await _diaryRepo.GetMyAsync(userId);
+
+            if (diaryNotes == null) 
+                return NotFound();
+
+            var diaryNotesDto = diaryNotes.Select(d => d.ToDiaryNoteDto());
+
+            return Ok(diaryNotesDto);
         }
 
         [HttpGet("{id:int}")]
@@ -42,12 +63,18 @@ namespace WellBeingDiary.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Create([FromBody] CreateDiaryNoteRequestDto diaryNoteDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var diaryNoteModel = diaryNoteDto.ToDiaryNoteFromCreateDto();
+            var userId =  _userRepo.GetMyId();
+
+            if (userId == null) 
+                return NotFound();
+
+            var diaryNoteModel = diaryNoteDto.ToDiaryNoteFromCreateDto(userId);
 
             await _diaryRepo.CreateAsync(diaryNoteModel);
 

@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using WellBeingDiary.Data;
 using WellBeingDiary.Dtos.DiaryNote;
 using WellBeingDiary.Entities;
@@ -18,6 +21,7 @@ namespace WellBeingDiary.Repositories
         {
             await _context.DiaryNotes.AddAsync(diaryModel);
             await _context.SaveChangesAsync();
+
             return diaryModel;
         }
 
@@ -44,6 +48,11 @@ namespace WellBeingDiary.Repositories
         public async Task<DiaryNote?> GetByIdAsync(int id)
         {
             return await _context.DiaryNotes.FindAsync(id);
+        }
+
+        public async Task<List<DiaryNote>> GetMyAsync(string userId)
+        {
+            return await _context.DiaryNotes.Where(note => note.User!.Id == userId).ToListAsync();
         }
 
         public async Task<DiaryNote?> UpdateAsync(int id, UpdateDiaryNoteRequestDto diaryDto)

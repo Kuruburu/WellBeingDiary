@@ -19,5 +19,6 @@ namespace WellBeingDiary.Dtos.DiaryNote
         [Required]
         [Range(1, 10)]
         public int Rating { get; set; }
+        private string UserId { get; set; } = string.Empty;
     }
 }
