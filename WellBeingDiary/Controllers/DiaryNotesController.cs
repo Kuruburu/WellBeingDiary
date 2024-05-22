@@ -50,6 +50,7 @@ namespace WellBeingDiary.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [Authorize("admin")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             var diaryNote = await _diaryRepo.GetByIdAsync(id);
@@ -82,6 +83,7 @@ namespace WellBeingDiary.Controllers
         }
 
         [HttpPut("{id:int}")]
+        [Authorize]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateDiaryNoteRequestDto updateDto)
         {
             if (!ModelState.IsValid)
@@ -98,6 +100,7 @@ namespace WellBeingDiary.Controllers
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize("admin")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             var diaryNoteModel = await _diaryRepo.DeleteAsync(id);
