@@ -26,6 +26,20 @@ namespace WellBeingDiary.Repositories
             return await _userManager.FindByIdAsync(id);
         }
 
+        public async Task<IEnumerable<string>> GetUserRolesAsync(string userName)
+        {
+            var user = await _userManager.FindByNameAsync(userName);
+
+            if (user is null)
+            {
+                return null!;
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            return roles;
+        }
+
         public async Task<AppUser?> DeleteAsync(string id)
         {
             var user = await _userManager.FindByIdAsync(id);

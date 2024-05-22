@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -11,43 +10,19 @@ namespace WellBeingDiary.Services
     public class TokenService : ITokenService
     {
         private readonly IConfiguration _config;
-        private readonly UserManager<AppUser> _userManager;
         private readonly SymmetricSecurityKey _key;
+        private readonly IUserRepository _userRepo;
 
-        public TokenService(IConfiguration config, UserManager<AppUser> userManager)
+        public TokenService(IConfiguration config, IUserRepository userRepo)
         {
             _config = config;
-            _userManager = userManager;
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSettings:Key"]!));
-        }
-        public async Task<IEnumerable<string>> GetUserRoleAsync(string userName)
-        {
-            var user = await _userManager.FindByNameAsync(userName);
-
-            if (user != null)
-            {
-                var roles = await _userManager.GetRolesAsync(user);
-
-                return roles;
-            }
-            return null!;
-        }
-        public async Task<IEnumerable<string>> GetUserIdAsync(string userName)
-        {
-            var user = await _userManager.FindByNameAsync(userName);
-
-            if (user != null)
-            {
-                var roles = await _userManager.GetRolesAsync(user);
-
-                return roles;
-            }
-            return null!;
+            _userRepo = userRepo;
         }
 
         public async Task<string> CreateToken(AppUser user)
         {
-            var userRoles = await GetUserRoleAsync(user.UserName!);
+            var userRoles = await _userRepo.GetUserRolesAsync(user.UserName!);
 
             var claims = new List<Claim>
             {
