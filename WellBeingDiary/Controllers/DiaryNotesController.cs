@@ -35,15 +35,12 @@ namespace WellBeingDiary.Controllers
         [Authorize]
         public async Task<IActionResult> GetAllMy()
         {
-            var userId = _userRepo.GetMyId();
+            var myId = _userRepo.GetMyId();
 
-            if (userId == null)
-                return NotFound();
+            if (string.IsNullOrEmpty(myId))
+                return Unauthorized();
 
-            var diaryNotes = await _diaryRepo.GetAllMyAsync(userId);
-
-            if (diaryNotes == null) 
-                return NotFound();
+            var diaryNotes = await _diaryRepo.GetAllMyAsync(myId);
 
             var diaryNotesDto = diaryNotes.Select(d => d.ToDiaryNoteDto());
 
@@ -56,10 +53,8 @@ namespace WellBeingDiary.Controllers
         {
             var diaryNote = await _diaryRepo.GetByIdAsync(id);
 
-            if(diaryNote == null)
-            {
+            if(diaryNote is null)
                 return NotFound();
-            }
 
             return Ok(diaryNote.ToDiaryNoteDto());
         }
@@ -71,12 +66,12 @@ namespace WellBeingDiary.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var userId = _userRepo.GetMyId();
+            var myId = _userRepo.GetMyId();
 
-            if (userId == null) 
-                return NotFound();
+            if (string.IsNullOrEmpty(myId))
+                return Unauthorized();
 
-            var diaryNoteModel = diaryNoteDto.ToDiaryNoteFromCreateDto(userId);
+            var diaryNoteModel = diaryNoteDto.ToDiaryNoteFromCreateDto(myId);
 
             await _diaryRepo.CreateAsync(diaryNoteModel);
 
@@ -92,10 +87,8 @@ namespace WellBeingDiary.Controllers
 
             var diaryNoteModel = await _diaryRepo.UpdateAsync(id, updateDto);
 
-            if(diaryNoteModel == null)
-            {
+            if(diaryNoteModel is null)
                 return NotFound();
-            }
 
             return Ok(diaryNoteModel.ToDiaryNoteDto());
         }
@@ -106,10 +99,8 @@ namespace WellBeingDiary.Controllers
         {
             var diaryNoteModel = await _diaryRepo.DeleteAsync(id);
             
-            if(diaryNoteModel == null)
-            {
+            if(diaryNoteModel is null)
                 return NotFound();
-            }
             
             return NoContent();
         }
