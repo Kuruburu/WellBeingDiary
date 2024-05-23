@@ -40,7 +40,7 @@ namespace WellBeingDiary.Controllers
         {
             var user = await _userRepo.GetByIdAsync(id);
 
-            if (user == null)
+            if (user is null)
                 return NotFound();
 
             return Ok(user);
@@ -50,24 +50,24 @@ namespace WellBeingDiary.Controllers
         [Authorize]
         public async Task<IActionResult> GetMe()
         {
-            var user = await _userRepo.GetMeAsync();
+            var me = await _userRepo.GetMeAsync();
 
-            if (user is null)
+            if (me is null)
                 return NotFound();
 
-            return Ok(user);
+            return Ok(me);
         }
 
         [HttpGet("me/id")]
         [Authorize]
         public IActionResult GetMyId()
         {
-            var userId = _userRepo.GetMyId();
+            var myId = _userRepo.GetMyId();
 
-            if (userId == null)
+            if (string.IsNullOrEmpty(myId))
                 return NotFound();
 
-            return Ok(userId);
+            return Ok(myId);
         }
 
         [HttpPost("login")]
@@ -78,7 +78,7 @@ namespace WellBeingDiary.Controllers
 
             var user = await _userManager.Users.FirstOrDefaultAsync(x => x.UserName == loginDto.Username!.ToLower());
 
-            if (user == null) return Unauthorized("Invalid username!");
+            if (user is null) return Unauthorized("Invalid username!");
 
             var result = await _signinManager.CheckPasswordSignInAsync(user, loginDto.Password!, false);
 
@@ -139,7 +139,7 @@ namespace WellBeingDiary.Controllers
         {
             var user = await _userRepo.DeleteAsync(id);
 
-            if (user == null)
+            if (user is null)
                 return NotFound();
 
             return NoContent();
