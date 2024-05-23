@@ -31,9 +31,7 @@ namespace WellBeingDiary.Repositories
             var user = await _userManager.FindByNameAsync(userName);
 
             if (user is null)
-            {
                 return null!;
-            }
 
             var roles = await _userManager.GetRolesAsync(user);
 

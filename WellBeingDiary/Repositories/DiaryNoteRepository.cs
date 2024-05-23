@@ -29,10 +29,8 @@ namespace WellBeingDiary.Repositories
         {
             var diaryNoteModel = await _context.DiaryNotes.FirstOrDefaultAsync(x => x.Id == id);
 
-            if (diaryNoteModel == null)
-            {
+            if (diaryNoteModel is null)
                 return null;
-            }
 
             _context.DiaryNotes.Remove(diaryNoteModel);
             await _context.SaveChangesAsync();
@@ -55,14 +53,13 @@ namespace WellBeingDiary.Repositories
             return await _context.DiaryNotes.Where(note => note.User!.Id == userId).ToListAsync();
         }
 
+
         public async Task<DiaryNote?> UpdateAsync(int id, UpdateDiaryNoteRequestDto diaryDto)
         {
             var diaryNoteModel = await _context.DiaryNotes.FirstOrDefaultAsync(x => x.Id == id);
 
-            if (diaryNoteModel == null)
-            {
+            if (diaryNoteModel is null)
                 return null;
-            }
 
             diaryNoteModel.Title = diaryDto.Title;
             diaryNoteModel.Text = diaryDto.Text;
