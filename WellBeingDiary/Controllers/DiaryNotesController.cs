@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using WellBeingDiary.Dtos.DiaryNote;
 using WellBeingDiary.Interfaces;
 using WellBeingDiary.Mappers;
@@ -39,7 +40,7 @@ namespace WellBeingDiary.Controllers
             if (userId == null)
                 return NotFound();
 
-            var diaryNotes = await _diaryRepo.GetMyAsync(userId);
+            var diaryNotes = await _diaryRepo.GetAllMyAsync(userId);
 
             if (diaryNotes == null) 
                 return NotFound();
@@ -70,7 +71,7 @@ namespace WellBeingDiary.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var userId =  _userRepo.GetMyId();
+            var userId = _userRepo.GetMyId();
 
             if (userId == null) 
                 return NotFound();
@@ -110,6 +111,25 @@ namespace WellBeingDiary.Controllers
                 return NotFound();
             }
             
+            return NoContent();
+        }
+
+        [HttpDelete("me/{id}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteMy([FromRoute] int id)
+        {
+            var myId = _userRepo.GetMyId();
+
+            if (string.IsNullOrEmpty(myId))
+                return Unauthorized();
+
+            var myDiaryNoteModel = await _diaryRepo.GetMyByIdAsync(id, myId);
+
+            if (myDiaryNoteModel is null)
+                return NotFound();
+
+            await _diaryRepo.DeleteAsync(id);
+
             return NoContent();
         }
     }
