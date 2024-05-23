@@ -144,5 +144,19 @@ namespace WellBeingDiary.Controllers
 
             return NoContent();
         }
+
+        [HttpDelete("me")]
+        [Authorize]
+        public async Task<IActionResult> DeleteMe()
+        {
+            var myId = _userRepo.GetMyId();
+
+            if (string.IsNullOrEmpty(myId))
+                return Unauthorized();
+
+            await _userRepo.DeleteAsync(myId);
+
+            return NoContent();
+        }
     }
 }
