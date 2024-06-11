@@ -1,4 +1,5 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Azure;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -49,6 +50,17 @@ namespace WellBeingDiary.Services
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
             return await Task.FromResult(tokenHandler.WriteToken(token));
+        }
+        public void SetTokenCookie(HttpContext httpContext, string token)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTime.UtcNow.AddHours(1),
+                Secure = true,
+                SameSite = SameSiteMode.Strict
+            };
+            httpContext.Response.Cookies.Append("token", token, cookieOptions);
         }
     }
 }

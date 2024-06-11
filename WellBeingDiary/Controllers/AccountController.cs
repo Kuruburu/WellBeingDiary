@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Common;
 using WellBeingDiary.Dtos.Account;
 using WellBeingDiary.Entities;
 using WellBeingDiary.Interfaces;
@@ -83,13 +85,22 @@ namespace WellBeingDiary.Controllers
             var result = await _signinManager.CheckPasswordSignInAsync(user, loginDto.Password!, false);
 
             if (!result.Succeeded) return Unauthorized("Username not found and/or password incorrect");
+            
+            var token = await _tokenService.CreateToken(user);
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Strict
+            };
+            Response.Cookies.Append("jwt", token, cookieOptions);
 
             return Ok(
                 new NewUserDto
                 {
                     UserName = user.UserName,
                     Email = user.Email,
-                    Token = await _tokenService.CreateToken(user)
+                    Token = token
                 }
             );
         }
@@ -118,12 +129,15 @@ namespace WellBeingDiary.Controllers
                 if (!roleResult.Succeeded)
                     return StatusCode(500, roleResult.Errors);
 
+                var token = await _tokenService.CreateToken(appUser);
+                _tokenService.SetTokenCookie(HttpContext, token);
+
                 return Ok(
                     new NewUserDto
                     {
                         UserName = appUser.UserName,
                         Email = appUser.Email,
-                        Token = await _tokenService.CreateToken(appUser)
+                        Token = token
                     }
                 );
             }
