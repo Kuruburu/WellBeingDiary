@@ -4,6 +4,7 @@
     {
         public int Id { get; set; }
         public DateTime CreationDate { get; set; } = DateTime.UtcNow;
+        public DateTime Date { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Text { get; set; } = string.Empty;
         public bool IsPublic { get; set; } = false;

@@ -44,9 +44,9 @@ builder.Services.AddSwaggerGen(option =>
     });
 });
 
-builder.Services.AddDbContext<DiaryDbContext>(options =>
+builder.Services.AddEntityFrameworkNpgsql().AddDbContext<DiaryDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
@@ -101,10 +101,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policy =>
                       {
-                          policy.AllowAnyOrigin() //WithOrigins("http://localhost:5173")
+                          policy.WithOrigins("https://well-being-diary-web.vercel.app/")
                                 .AllowAnyHeader()
-                                .AllowAnyMethod()
-                                .AllowCredentials();
+                                .AllowAnyMethod();
+                                //.AllowCredentials();
                       });
 });
 

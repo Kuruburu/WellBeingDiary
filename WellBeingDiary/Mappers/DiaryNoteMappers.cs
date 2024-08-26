@@ -14,6 +14,8 @@ namespace WellBeingDiary.Mappers
                 Text = diaryNote.Text,
                 IsPublic = diaryNote.IsPublic,
                 Rating = diaryNote.Rating,
+                CreationDate = diaryNote.CreationDate,
+                Date = diaryNote.Date,
                 UserId = diaryNote.UserId
             };
         }
@@ -27,6 +29,7 @@ namespace WellBeingDiary.Mappers
                 IsPublic = diaryNoteDto.IsPublic,
                 Rating = diaryNoteDto.Rating,
                 CreationDate = DateTime.UtcNow,
+                Date = diaryNoteDto.Date,
                 UserId = userId
             };
         }

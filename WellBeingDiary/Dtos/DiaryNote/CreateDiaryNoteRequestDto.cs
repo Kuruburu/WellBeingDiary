@@ -15,6 +15,7 @@ namespace WellBeingDiary.Dtos.DiaryNote
 
         [DefaultValue(false)]
         public bool IsPublic { get; set; } = false;
+        public DateTime Date { get; set; }
 
         [Required]
         [Range(1, 10)]
